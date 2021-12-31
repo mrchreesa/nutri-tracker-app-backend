@@ -11,6 +11,7 @@ const IngredientsSchema = new mongoose.Schema({
   totalFat: Number,
   carbs: Number,
   sugar: Number,
+  date: Date,
 });
 
 module.exports = mongoose.model("Ingredients", IngredientsSchema);

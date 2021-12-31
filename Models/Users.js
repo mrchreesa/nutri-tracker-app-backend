@@ -28,8 +28,14 @@ const UsersSchema = new mongoose.Schema({
   },
   ingredients: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Ingredients",
+      date: {
+        type: Date,
+        required: true,
+      },
+      ingredient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ingredients",
+      },
     },
   ],
 });

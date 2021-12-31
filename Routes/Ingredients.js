@@ -13,7 +13,7 @@ module.exports = (db) => {
     const foodId = req.params.foodId;
     axios
       .get(
-        `https://api.spoonacular.com/food/ingredients/${foodId}/information?amount=1&apiKey=${process.env.API_KEY}`
+        `https://api.spoonacular.com/food/ingredients/${foodId}/information?amount=1&apiKey=${process.env.API_KEY2}`
       )
       .then(({ data }) => {
         const nutrients = data.nutrition.nutrients;
@@ -28,6 +28,8 @@ module.exports = (db) => {
           (newNutrients["Mono Unsaturated Fat"] !== undefined
             ? newNutrients["Mono Unsaturated Fat"].amount
             : 0);
+        let day = new Date();
+        let dayOfWeek = { $dayOfWeek: "$date" };
         const newFoodEntry = new Ingredients({
           name: data.name,
           foodId: data.id,
@@ -53,10 +55,15 @@ module.exports = (db) => {
             newNutrients.Carbohydrates.amount !== undefined
               ? newNutrients.Carbohydrates.amount
               : 0,
+          date: day,
         });
+
         newFoodEntry.save().then((data) => {
-          res.send(data);
+          res.status(201).send(data);
         });
+      })
+      .catch((err) => {
+        res.status(400);
       });
   });
 
@@ -64,14 +71,21 @@ module.exports = (db) => {
     const foodId = req.params.foodId;
     axios
       .get(
-        `https://api.spoonacular.com/food/ingredients/${foodId}/information?amount=1&apiKey=${process.env.API_KEY}`
+        `https://api.spoonacular.com/food/ingredients/${foodId}/information?amount=1&apiKey=${process.env.API_KEY2}`
       )
       .then((data) => {
         res.send(data.data);
       });
   });
   router.get("/", (req, res) => {
-    Ingredients.find({})
+    let day = new Date();
+
+    Ingredients.find({
+      // date: {
+      //   $gte: day.setDate(day.getDate() - 1),
+      //   $lte: day.setDate(day.getDate() + 1),
+      // },
+    })
       .then((data) => {
         res.send(data);
       })

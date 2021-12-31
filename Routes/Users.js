@@ -6,21 +6,54 @@ const bcrypt = require("bcrypt");
 module.exports = function (database) {
   router.post("/", (req, res) => {
     const { username, password, email } = req.body;
-    bcrypt.hash(password, 10).then((hash) => {
-      const newUser = new Users({
-        username,
-        password: hash,
-        email,
+    if (password.length >= 6) {
+      bcrypt.hash(password, 10).then((hash) => {
+        const newUser = new Users({
+          username,
+          password: hash,
+          email,
+        });
+
+        const validation = () => {
+          newUser
+            .validate()
+            .then(() => {
+              console.log("Validation passed.");
+              newUser
+                .save()
+                .then(() => console.log("Saved successfully."))
+                .catch(() => console.log("Saving failed."));
+              res.cookie("user", JSON.stringify({ username, email }), {
+                httpOnly: true,
+
+                expiresIn: 86400,
+              });
+              res.send({ username, email });
+            })
+            .catch(() => {
+              res.status(401).send("User Validation failed.");
+              console.log("Validation failed.");
+            });
+        };
+        validation();
       });
-      newUser.save();
-
-      res.send({ username, email });
-    });
+    } else {
+      res.status(500).send("Invalid Credentials");
+    }
   });
-  router.get("/", (req, res) => {
-    const { username, email } = req.body;
 
-    res.send({ username, email });
+  router.get("/:userId", (req, res) => {
+    Users.find({
+      _id: req.params.userId,
+    })
+      .populate({
+        path: "ingredients.ingredient",
+        model: Ingredients,
+      })
+      .then((response) => {
+        res.status(200).send(response);
+      });
+    //res.send({ username, email });
   });
 
   router.post("/session", (req, res) => {
@@ -57,13 +90,35 @@ module.exports = function (database) {
     Ingredients.findOneAndUpdate({ foodId: ingredientId }, req.body, {
       upsert: true,
       returnDocument: "after",
-    });
-    Users.findByIdAndUpdate(userId, { ingredients: [ingredientId] });
+    })
+      .then((data) => {
+        Users.findByIdAndUpdate(userId, { ingredients: [data._id] }).then(
+          (response) => {
+            // console.log(response);
+            res.status(201).send("User updated successfully");
+          }
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    // Restrcuture spoonacular API object from client here.
+
+    console.log();
   });
 
   router.get("/session", (req, res) => {
-    const cookieData = JSON.parse(req.cookies.user);
-    res.json({ cookieData });
+    // if (req.cookies.user == "undefined" || req.cookies.user == undefined) {
+    //   res.status(401).json({ message: "not logged in!" });
+    //   return;
+    // }
+    if (req.cookies.user) {
+      const cookieData = JSON.parse(req.cookies.user);
+      res.json(cookieData);
+    } else {
+      res.status(401).json({ message: "not logged in!" });
+      return;
+    }
   });
 
   router.delete("/session", (req, res) => {
