@@ -4,6 +4,7 @@ const Ingredients = require("../Models/Ingredients");
 const bcrypt = require("bcrypt");
 
 module.exports = function (database) {
+  // Register User
   router.post("/", (req, res) => {
     const { username, password, email } = req.body;
     if (password.length >= 6) {
@@ -42,6 +43,7 @@ module.exports = function (database) {
     }
   });
 
+  //GET User by Id
   router.get("/:userId", (req, res) => {
     Users.find({
       _id: req.params.userId,
@@ -56,6 +58,48 @@ module.exports = function (database) {
     //res.send({ username, email });
   });
 
+  // GET food in User's profile
+  router.get("/:userId/ingredients/:ingredientId", (req, res) => {
+    const userId = req.params.userId;
+    const ingredientId = req.params.ingredientId;
+    Ingredients.find({
+      _id: ingredientId,
+    })
+      .then((data) => {
+        res.send(data);
+        console.log(data);
+      })
+      .catch((err) => {
+        res.send(err.message);
+      });
+  });
+
+  //POST food in User's profile
+  router.post("/:userId/ingredients/:ingredientId", (req, res) => {
+    const userId = req.params.userId;
+    const ingredientId = req.params.ingredientId;
+    Ingredients.findOneAndUpdate({ foodId: ingredientId }, req.body, {
+      returnDocument: "after",
+    })
+      .then((data) => {
+        console.log(data);
+
+        Users.findByIdAndUpdate(userId, { ingredients: [data._id] }).then(
+          (response) => {
+            console.log(response);
+            res.status(201).send("User updated successfully");
+          }
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    // Restrcuture spoonacular API object from client here.
+
+    console.log();
+  });
+
+  //Create session/log in
   router.post("/session", (req, res) => {
     const { password, email } = req.body;
 
@@ -84,29 +128,7 @@ module.exports = function (database) {
     });
   });
 
-  router.post("/:userId/ingredients/:ingredientId", (req, res) => {
-    const userId = req.params.userId;
-    const ingredientId = req.params.ingredientId;
-    Ingredients.findOneAndUpdate({ foodId: ingredientId }, req.body, {
-      upsert: true,
-      returnDocument: "after",
-    })
-      .then((data) => {
-        Users.findByIdAndUpdate(userId, { ingredients: [data._id] }).then(
-          (response) => {
-            // console.log(response);
-            res.status(201).send("User updated successfully");
-          }
-        );
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    // Restrcuture spoonacular API object from client here.
-
-    console.log();
-  });
-
+  //GET current user/session
   router.get("/session", (req, res) => {
     // if (req.cookies.user == "undefined" || req.cookies.user == undefined) {
     //   res.status(401).json({ message: "not logged in!" });
@@ -121,6 +143,7 @@ module.exports = function (database) {
     }
   });
 
+  //DELETE session/log out
   router.delete("/session", (req, res) => {
     res.cookie("user", undefined, { httpOnly: true });
     res.json({ message: "Logged out!" });
