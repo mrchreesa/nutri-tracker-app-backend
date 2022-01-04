@@ -5,6 +5,8 @@ const { json } = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const Bree = require("bree");
+require("dotenv").config();
+
 app.use(function (req, res, next) {
   //potential timeout problem with request.
   res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
@@ -32,7 +34,7 @@ const port = 8080;
 
 //app.use((req, res, next, error) => {});
 
-app.listen(port, () => {
+app.listen(process.env.PORT || port, () => {
   console.log(`Server is listening on port ${port}...`);
 });
 
