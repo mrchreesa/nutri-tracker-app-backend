@@ -18,27 +18,27 @@ chai.use(chaiHttp);
 
 describe("Users API", () => {
   // Test Register User to DB - POST Route
-  //   describe("POST /api/users", () => {
-  //     it("It should create a user to DB", (done) => {
-  //       const userCredentials = {
-  //         username,
-  //         email,
-  //         password,
-  //       };
-  //       chai
-  //         .request(server)
-  //         .post("/api/users/")
-  //         .send(userCredentials)
-  //         .end((err, response) => {
-  //           response.should.have.status(200);
-  //           response.body.should.be.a("object");
-  //           response.body.should.have.property("username");
-  //           response.body.should.have.property("email");
+  describe("POST /api/users", () => {
+    it("It should create a user to DB", (done) => {
+      const userCredentials = {
+        username,
+        email,
+        password,
+      };
+      chai
+        .request(server)
+        .post("/api/users/")
+        .send(userCredentials)
+        .end((err, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a("object");
+          response.body.should.have.property("username");
+          response.body.should.have.property("email");
 
-  //           done();
-  //         });
-  //     });
-  //   });
+          done();
+        });
+    });
+  });
   describe("POST /api/users", () => {
     it("It should NOT create a user to DB", (done) => {
       const falsyUserCredentials = {

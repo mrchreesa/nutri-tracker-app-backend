@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+// Object ID updates on upsert, so had to change back to manuial aproac. IN future, use version keys, they look like a good solution.
 
 const UsersSchema = new mongoose.Schema({
   username: {
