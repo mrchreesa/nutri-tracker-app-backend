@@ -5,6 +5,8 @@ const { json } = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const Bree = require("bree");
+const mongoose = require("mongoose");
+
 require("dotenv").config();
 
 app.use(function (req, res, next) {
@@ -19,7 +21,6 @@ app.use(function (req, res, next) {
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
-const mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost/nutri-tracker");
 
 var db = mongoose;
@@ -37,5 +38,8 @@ const port = 8080;
 app.listen(process.env.PORT || port, () => {
   console.log(`Server is listening on port ${port}...`);
 });
-
+const bree = new Bree({
+  jobs: [{ name: "cleaning-profile-foods", interval: "30s" }],
+});
+// bree.start();
 module.exports = app;
