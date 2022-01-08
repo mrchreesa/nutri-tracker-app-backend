@@ -2,51 +2,8 @@ const router = require("express").Router();
 const Users = require("../Models/Users");
 const Ingredients = require("../Models/Ingredients");
 const bcrypt = require("bcrypt");
-const axios = require("axios");
-const { authOnly, ingredientsFactory } = require("../Libs");
-const { post } = require("./Ingredients");
-const addFoodToIngredients = (spoonacularData, res) => {
-  const newFoodEntry = new Ingredients(ingredientsFactory(spoonacularData));
-  return newFoodEntry.save();
-};
 
 module.exports = function (database) {
-  //GET current user/session
-  router.get("/session", (req, res) => {
-    // if (req.cookies.user == "undefined" || req.cookies.user == undefined) {
-    //   res.status(401).json({ message: "not logged in!" });
-    //   return;
-    // }
-    if (req.cookies.user) {
-      const cookieData = JSON.parse(req.cookies.user);
-      res.json(cookieData);
-    } else {
-      res.status(401).json({ message: "not logged in!" });
-      return;
-    }
-  });
-
-  //DELETE session/log out
-  router.delete("/session", (req, res) => {
-    res.cookie("user", undefined, { httpOnly: true });
-    res.json({ message: "Logged out!" });
-  });
-
-  //GET User by Id
-  router.get("/:userName", (req, res) => {
-    Users.find({
-      username: req.params.userName,
-    })
-      .populate({
-        path: "ingredients.ingredient",
-        model: Ingredients,
-      })
-      .then((response) => {
-        res.status(200).send(response);
-      });
-    //res.send({ username, email });
-  });
-
   // Register User
   router.post("/", (req, res) => {
     const { username, password, email } = req.body;
@@ -86,13 +43,27 @@ module.exports = function (database) {
     }
   });
 
+  //GET User by Id
+  router.get("/:userId", (req, res) => {
+    Users.find({
+      _id: req.params.userId,
+    })
+      .populate({
+        path: "ingredients.ingredient",
+        model: Ingredients,
+      })
+      .then((response) => {
+        res.status(200).send(response);
+      });
+    //res.send({ username, email });
+  });
+
   // GET food in User's profile
   router.get("/:userId/ingredients/:ingredientId", (req, res) => {
     const userId = req.params.userId;
     const ingredientId = req.params.ingredientId;
-    U;
     Ingredients.find({
-      foodId: ingredientId,
+      _id: ingredientId,
     })
       .then((data) => {
         res.send(data);
@@ -104,120 +75,28 @@ module.exports = function (database) {
   });
 
   //POST food in User's profile
-  router.post("/:username/ingredients/:ingredientId", (req, res) => {
+  router.post("/:userId/ingredients/:ingredientId", (req, res) => {
+    const userId = req.params.userId;
     const ingredientId = req.params.ingredientId;
-    const username = req.params.username;
+    Ingredients.findOneAndUpdate({ foodId: ingredientId }, req.body, {
+      returnDocument: "after",
+    })
+      .then((data) => {
+        console.log(data);
 
-    axios
-      .get(
-        `https://api.spoonacular.com/food/ingredients/${ingredientId}/information?amount=1&apiKey=${process.env.API_KEY2}`
-      )
-      .then((response) => {
-        const spoonacularData = response.data;
-        Ingredients.findOne({ foodId: ingredientId }).then((data) => {
-          console.log(data);
-          if (data == undefined || null) {
-            addFoodToIngredients(spoonacularData).then((data) => {
-              Ingredients.findOneAndUpdate({ foodId: ingredientId }, req.body, {
-                returnDocument: "after",
-              })
-                .then((data) => {
-                  console.log(data);
-
-                  Users.findOneAndUpdate(
-                    { username: username },
-                    {
-                      $push: {
-                        ingredients: {
-                          ingredient: data._id,
-                          date: new Date(),
-                        },
-                      },
-                    }
-                  ).then((response) => {
-                    res
-                      .status(201)
-                      .send("User updated successfully" + response);
-                  });
-                })
-
-                .catch((error) => {
-                  console.log(error);
-                });
-            });
-          } else {
-            const id = data._id;
-            Ingredients.findByIdAndUpdate(
-              id,
-              ingredientsFactory(spoonacularData, username)
-            ).then((response) => {
-              console.log(response);
-              Ingredients.findOneAndUpdate({ foodId: ingredientId }, req.body, {
-                returnDocument: "after",
-              })
-                .then((data) => {
-                  console.log(data);
-
-                  Users.findOneAndUpdate(
-                    { username: username },
-                    {
-                      $push: {
-                        ingredients: {
-                          ingredient: data._id,
-                          date: new Date(),
-                        },
-                      },
-                    }
-                  ).then((response) => {
-                    res
-                      .status(201)
-                      .send("User updated successfully" + response);
-                  });
-                })
-
-                .catch((error) => {
-                  console.log(error);
-                });
-            });
+        Users.findByIdAndUpdate(userId, { ingredients: [data._id] }).then(
+          (response) => {
+            console.log(response);
+            res.status(201).send("User updated successfully");
           }
-        });
+        );
       })
-      .catch((err) => {
-        console.log(err.message);
-
-        res.status(400);
+      .catch((error) => {
+        console.log(error);
       });
-
     // Restrcuture spoonacular API object from client here.
-  });
 
-  //DELETE food in User's profile
-  router.patch("/:username/ingredients/:foodEntryId", (req, res) => {
-    const { foodEntryId, username } = req.params;
-
-    Users.findOneAndUpdate(
-      { username: username },
-      {
-        $pull: { ingredients: { _id: foodEntryId } },
-      },
-      { new: true }
-    )
-      .then((response) => {
-        res.send(response);
-
-        // const newResponse = response.ingredients;
-        // Users.findOne(newResponse)
-        //   .then((response) => {
-        //     console.log(response);
-        //   })
-        //   .catch((err) => {
-        //     res.send(err.message);
-        //   });
-      })
-
-      .catch((err) => {
-        res.send(err.message);
-      });
+    console.log();
   });
 
   //Create session/log in
@@ -247,6 +126,27 @@ module.exports = function (database) {
         res.status(401).send("Invalid User");
       }
     });
+  });
+
+  //GET current user/session
+  router.get("/session", (req, res) => {
+    // if (req.cookies.user == "undefined" || req.cookies.user == undefined) {
+    //   res.status(401).json({ message: "not logged in!" });
+    //   return;
+    // }
+    if (req.cookies.user) {
+      const cookieData = JSON.parse(req.cookies.user);
+      res.json(cookieData);
+    } else {
+      res.status(401).json({ message: "not logged in!" });
+      return;
+    }
+  });
+
+  //DELETE session/log out
+  router.delete("/session", (req, res) => {
+    res.cookie("user", undefined, { httpOnly: true });
+    res.json({ message: "Logged out!" });
   });
 
   return router;

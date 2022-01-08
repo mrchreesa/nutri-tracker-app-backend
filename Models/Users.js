@@ -31,6 +31,7 @@ const UsersSchema = new mongoose.Schema({
     {
       date: {
         type: Date,
+        required: true,
       },
       ingredient: {
         type: mongoose.Schema.Types.ObjectId,
