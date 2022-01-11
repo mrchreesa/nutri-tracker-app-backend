@@ -3,10 +3,8 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 const Ingredients = require("../Models/Ingredients");
 
-require("dotenv").config();
-
 const { authOnly } = require("../Libs");
-
+require("dotenv").config();
 const ingredientsFactory = (data) => {
   const nutrients = data.nutrition.nutrients;
   let newNutrients = {};

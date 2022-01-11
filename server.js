@@ -39,7 +39,7 @@ app.listen(process.env.PORT || port, () => {
   console.log(`Server is listening on port ${port}...`);
 });
 const bree = new Bree({
-  jobs: [{ name: "cleaning-profile-foods", interval: "30s" }],
+  jobs: [{ name: "cleaning-profile-foods", interval: "at 00:00 am" }],
 });
-// bree.start();
+bree.start();
 module.exports = app;
