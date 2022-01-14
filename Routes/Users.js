@@ -27,16 +27,10 @@ module.exports = function (database) {
     }
   });
 
-  //DELETE session/log out
-  router.delete("/session", (req, res) => {
-    res.cookie("user", undefined, { httpOnly: true });
-    res.json({ message: "Logged out!" });
-  });
-
   //GET User by Id
-  router.get("/:userName", (req, res) => {
+  router.get("/:username", (req, res) => {
     Users.find({
-      username: req.params.userName,
+      username: req.params.username,
     })
       .populate({
         path: "ingredients.ingredient",
@@ -88,12 +82,12 @@ module.exports = function (database) {
   });
 
   // GET food in User's profile
-  router.get("/:userId/ingredients/:ingredientId", (req, res) => {
-    const userId = req.params.userId;
+  router.get("/:username/ingredients/:ingredientId", (req, res) => {
+    const username = req.params.username;
     const ingredientId = req.params.ingredientId;
-    U;
-    Ingredients.find({
-      foodId: ingredientId,
+
+    Users.find({
+      username: username,
     })
       .then((data) => {
         res.send(data);
@@ -190,6 +184,11 @@ module.exports = function (database) {
       });
 
     // Restrcuture spoonacular API object from client here.
+  });
+  //DELETE session/log out
+  router.delete("/session", (req, res) => {
+    res.cookie("user", undefined, { httpOnly: true });
+    res.json({ message: "Logged out!" });
   });
 
   //DELETE food in User's profile
