@@ -21,7 +21,7 @@ app.use(function (req, res, next) {
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
-mongoose.connect("mongodb://localhost/nutri-tracker");
+mongoose.connect(process.env.MONGODB_URL);
 
 var db = mongoose;
 
