@@ -20,7 +20,7 @@ require("dotenv").config();
   );
   next();
 });*/
-app.use(corse());
+app.use(cors());
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
