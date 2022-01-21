@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 
 require("dotenv").config();
 
-app.use(function (req, res, next) {
+/*app.use(function (req, res, next) {
   //potential timeout problem with request.
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Credentials", true);
@@ -19,7 +19,8 @@ app.use(function (req, res, next) {
     "Origin,X-Requested-With,Content-Type,Accept,content-type,application/json"
   );
   next();
-});
+});*/
+app.use(corse());
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
