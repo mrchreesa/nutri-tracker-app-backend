@@ -21,7 +21,12 @@ require("dotenv").config();
   );
   next();
 });*/
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN : "*",
+  })
+);
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
