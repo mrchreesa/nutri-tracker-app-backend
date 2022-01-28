@@ -44,5 +44,6 @@ app.listen(process.env.PORT || port, () => {
 const bree = new Bree({
   jobs: [{ name: "cleaning-profile-foods", interval: "at 00:00 am" }],
 });
+app.set("trust proxy", 1);
 bree.start();
 module.exports = app;
