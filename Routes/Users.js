@@ -233,10 +233,10 @@ module.exports = function (database) {
             if (isPasswordCorrect) {
               const userData = { username: foundUser.username, email };
               res.cookie("user", JSON.stringify(userData), {
-                httpOnly: true,
+                httpOnly: true /*
                 domain: process.env.COOKIE_DOMAIN,
                 sameSite: "none",
-                expiresIn: 86400,
+                expiresIn: 86400,*/,
               });
               res.send(userData);
               console.log(userData);
