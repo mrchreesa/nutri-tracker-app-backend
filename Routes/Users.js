@@ -234,7 +234,7 @@ module.exports = function (database) {
               const userData = { username: foundUser.username, email };
               res.cookie("user", JSON.stringify(userData), {
                 httpOnly: true,
-                /*domain: process.env.COOKIE_DOMAIN,*/
+                domain: process.env.COOKIE_DOMAIN,
                 sameSite: "none",
                 expiresIn: 86400,
               });
