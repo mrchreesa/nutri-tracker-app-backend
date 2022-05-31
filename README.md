@@ -8,7 +8,7 @@
   </a>
 </p>
 
-The BackEnd in Nutri-Tracker App is build with Node.js and Express. I've used NoSQL database MongoDB through Mongoose to store the data related to user's profile. The login credentials are secured using Bcrypt and passed to the client with cookies. Form validation is in place on the badge as well as the frontend. Cron job is added with Bree to delete the foods in the user's profile at the end of the day.
+The BackEnd in Nutri-Tracker App is build with Node.js and Express. I've used NoSQL database MongoDB and Mongoose to store the data related to user's profile. The login credentials are secured using Bcrypt and passed to the client with cookies. Form validation is in place on the server as well as the frontend. Cron job is added with Bree to delete the foods in the user's profile at the end of the day.
 
 <img align="center" src="./preview 1.png" alt="preview" />
 <img align="center" src="./preview 2.png" alt="preview" />
