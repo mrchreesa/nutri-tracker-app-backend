@@ -22,10 +22,10 @@ require("dotenv").config();
   next();
 });*/
 app.use(
-  cors({
-    credentials: true,
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN : "*",
-  })
+	cors({
+		credentials: true,
+		origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN : "*",
+	})
 );
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
@@ -45,10 +45,10 @@ const port = 8080;
 //app.use((req, res, next, error) => {});
 
 app.listen(process.env.PORT || port, () => {
-  console.log(`Server is listening on port ${port}...`);
+	console.log(`Server is listening on port ${port}...`);
 });
 const bree = new Bree({
-  jobs: [{ name: "cleaning-profile-foods", interval: "at 00:00 am" }],
+	jobs: [{ name: "cleaning-profile-foods", interval: "at 00:00 am" }],
 });
 app.set("trust proxy", 1);
 bree.start();
