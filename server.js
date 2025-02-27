@@ -18,6 +18,12 @@ app.use(
 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
 	})
 );
+
+// Add explicit handling for OPTIONS requests
+app.options("*", (req, res) => {
+	res.status(200).end();
+});
+
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
