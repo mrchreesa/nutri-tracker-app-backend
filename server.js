@@ -13,7 +13,7 @@ require("dotenv").config();
 app.use(
 	cors({
 		credentials: true,
-		origin: process.env.CORS_ORIGIN || "https://nutri-tracker.krisrahnev.com",
+		origin: "*",
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
 	})

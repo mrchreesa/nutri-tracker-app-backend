@@ -211,47 +211,28 @@ module.exports = function (database) {
 	router.post("/session", (req, res) => {
 		const { password, email } = req.body;
 
-		console.log("Login attempt for email:", email);
-
-		Users.find({ email })
-			.then((attemptedLoginUserData) => {
-				if (attemptedLoginUserData.length) {
-					const foundUser = attemptedLoginUserData[0];
-					bcrypt
-						.compare(password, foundUser.password)
-						.then((isPasswordCorrect) => {
-							if (isPasswordCorrect) {
-								const userData = { username: foundUser.username, email };
-
-								// Set cookie with proper options for cross-domain use
-								res.cookie("user", JSON.stringify(userData), {
-									httpOnly: true,
-									secure: true, // Required for cross-site cookies
-									sameSite: "none", // Required for cross-site cookies
-									maxAge: 86400000, // 24 hours in milliseconds
-									path: "/",
-								});
-
-								console.log("Login successful for:", userData.username);
-								res.status(200).json(userData);
-							} else {
-								console.log("Password incorrect for:", email);
-								res.status(401).json({ message: "Incorrect credentials" });
-							}
-						})
-						.catch((error) => {
-							console.error("bcrypt compare error:", error);
-							res.status(500).json({ message: "Authentication error" });
+		Users.find({ email }).then((attemptedLoginUserData) => {
+			if (attemptedLoginUserData.length) {
+				const foundUser = attemptedLoginUserData[0];
+				bcrypt.compare(password, foundUser.password).then((isPasswordCorrect) => {
+					if (isPasswordCorrect) {
+						const userData = { username: foundUser.username, email };
+						res.cookie("user", JSON.stringify(userData), {
+							httpOnly: true /*
+                domain: process.env.COOKIE_DOMAIN,
+                sameSite: "none",
+                expiresIn: 86400,*/,
 						});
-				} else {
-					console.log("No user found with email:", email);
-					res.status(401).json({ message: "Invalid User" });
-				}
-			})
-			.catch((error) => {
-				console.error("Database error during login:", error);
-				res.status(500).json({ message: "Server error during login" });
-			});
+						res.send(userData);
+						console.log(userData);
+					} else {
+						res.status(401).send("Incorrect credentials");
+					}
+				});
+			} else {
+				res.status(401).send("Invalid User");
+			}
+		});
 	});
 
 	return router;
