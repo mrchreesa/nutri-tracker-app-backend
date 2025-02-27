@@ -10,46 +10,57 @@ const mongoose = require("mongoose");
 
 require("dotenv").config();
 
-/*app.use(function (req, res, next) {
-  //potential timeout problem with request.
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Credentials", true);
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin,X-Requested-With,Content-Type,Accept,content-type,application/json"
-  );
-  next();
-});*/
 app.use(
 	cors({
 		credentials: true,
-		origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN : "*",
+		origin: process.env.CORS_ORIGIN || "https://nutri-tracker.krisrahnev.com",
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
 	})
 );
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
 
-mongoose.connect(process.env.MONGODB_URL);
+// Connect to MongoDB with error handling
+mongoose
+	.connect(process.env.MONGODB_URL)
+	.then(() => console.log("MongoDB connected successfully"))
+	.catch((err) => console.error("MongoDB connection error:", err));
 
 var db = mongoose;
 
 app.use(json());
 app.use(cookieParser());
 
+// Add a basic health check endpoint
+app.get("/api/health", (req, res) => {
+	res.status(200).json({ status: "ok" });
+});
+
+// Set trust proxy before defining routes
+app.set("trust proxy", 1);
+
 app.use("/api/ingredients", Ingredients(db));
 app.use("/api/users", Users(db));
 
-const port = 8080;
+// Add error handling middleware
+app.use((err, req, res, next) => {
+	console.error("Server error:", err);
+	res.status(500).json({ message: "Internal server error", error: process.env.NODE_ENV === "production" ? null : err.message });
+});
 
-//app.use((req, res, next, error) => {});
+const port = process.env.PORT || 8080;
 
-app.listen(process.env.PORT || port, () => {
+app.listen(port, () => {
 	console.log(`Server is listening on port ${port}...`);
 });
-const bree = new Bree({
-	jobs: [{ name: "cleaning-profile-foods", interval: "at 00:00 am" }],
-});
-app.set("trust proxy", 1);
-bree.start();
+
+// Only start Bree if not in serverless environment
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+	const bree = new Bree({
+		jobs: [{ name: "cleaning-profile-foods", interval: "at 00:00 am" }],
+	});
+	bree.start();
+}
+
 module.exports = app;
