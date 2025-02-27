@@ -17,7 +17,7 @@ app.use(cookieParser());
 // Set trust proxy before defining routes
 app.set("trust proxy", 1);
 
-// Configure CORS - moved here to ensure it runs after other middleware
+// Configure CORS
 app.use(
 	cors({
 		credentials: true,

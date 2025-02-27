@@ -222,6 +222,7 @@ module.exports = function (database) {
 							httpOnly: true,
 							sameSite: "none",
 							secure: true,
+							path: "/",
 							maxAge: 86400000,
 						});
 						res.send(userData);
