@@ -15,17 +15,31 @@ app.use(json());
 app.use(cookieParser());
 app.set("trust proxy", 1);
 
+app.use(cors());
+
+// Add this middleware before any routes to handle OPTIONS requests
+app.use((req, res, next) => {
+	if (req.method === "OPTIONS") {
+		res.setHeader("Access-Control-Allow-Origin", "*");
+		res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+		res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+		res.status(200).end();
+		return;
+	}
+	next();
+});
+
 // CORS configuration with specific origin
-app.use(
-	cors({
-		origin: ["https://nutri-tracker-app-frontend.vercel.app", "http://localhost:3000"], // Allow both production and development
-		credentials: true,
-		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
-		preflightContinue: false,
-		optionsSuccessStatus: 200, // Changed from 204 to 200
-	})
-);
+// app.use(
+// 	cors({
+// 		origin: ["https://nutri-tracker-app-frontend.vercel.app", "http://localhost:3000"], // Allow both production and development
+// 		credentials: true,
+// 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+// 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
+// 		preflightContinue: false,
+// 		optionsSuccessStatus: 200, // Changed from 204 to 200
+// 	})
+// );
 
 // Handle OPTIONS requests explicitly - BEFORE any routes
 app.options("*", (req, res) => {
