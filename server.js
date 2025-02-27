@@ -32,11 +32,6 @@ var db = mongoose;
 app.use(json());
 app.use(cookieParser());
 
-// Add a basic health check endpoint
-app.get("/api/health", (req, res) => {
-	res.status(200).json({ status: "ok" });
-});
-
 // Set trust proxy before defining routes
 app.set("trust proxy", 1);
 

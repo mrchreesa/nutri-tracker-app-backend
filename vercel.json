@@ -11,9 +11,6 @@
 			]
 		}
 	],
-	"rewrites": [
-		{ "source": "/api/(.*)", "destination": "/api/$1" },
-		{ "source": "/(.*)", "destination": "/server.js" }
-	],
+	"rewrites": [{ "source": "/(.*)", "destination": "/server.js" }],
 	"builds": [{ "src": "server.js", "use": "@vercel/node" }]
 }
