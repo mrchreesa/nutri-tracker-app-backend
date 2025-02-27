@@ -10,19 +10,27 @@ const mongoose = require("mongoose");
 
 require("dotenv").config();
 
+// Move the CORS middleware after other middleware setup
+app.use(json());
+app.use(cookieParser());
+
+// Set trust proxy before defining routes
+app.set("trust proxy", 1);
+
+// Configure CORS - moved here to ensure it runs after other middleware
 app.use(
 	cors({
 		credentials: true,
 		origin: "https://nutri-tracker.krisrahnev.com",
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
+		preflightContinue: false,
+		optionsSuccessStatus: 204,
 	})
 );
 
 // Add explicit handling for OPTIONS requests
-app.options("*", (req, res) => {
-	res.status(200).end();
-});
+app.options("*", cors());
 
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
@@ -35,12 +43,7 @@ mongoose
 
 var db = mongoose;
 
-app.use(json());
-app.use(cookieParser());
-
-// Set trust proxy before defining routes
-app.set("trust proxy", 1);
-
+// Define routes after CORS setup
 app.use("/ingredients", Ingredients(db));
 app.use("/users", Users(db));
 
