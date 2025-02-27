@@ -4,7 +4,7 @@ const Ingredients = require("../Models/Ingredients");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 const { ingredientsFactory } = require("../Libs"); // Assuming this exists in your project
-
+console.log(process.env.API_KEY);
 module.exports = function (database) {
 	// GET current user/session
 	router.get("/session", (req, res) => {
@@ -100,25 +100,35 @@ module.exports = function (database) {
 				return res.status(400).json({ message: "Invalid username" });
 			}
 
+			console.log(`Finding user: ${username}`);
 			const user = await Users.findOne({ username });
+
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
 			}
 
+			console.log(`Checking ingredient: ${ingredientId}`);
 			let ingredient = await Ingredients.findOne({ foodId: ingredientId });
 			if (!ingredient) {
-				try {
-					const response = await axios.get(`https://api.spoonacular.com/food/ingredients/${ingredientId}/information?amount=1&apiKey=${process.env.SPOONACULAR_API_KEY}`);
-					const spoonacularData = response.data;
-					ingredient = new Ingredients(ingredientsFactory(spoonacularData));
-					await ingredient.save();
-				} catch (apiError) {
-					console.error("Spoonacular API error:", apiError);
-					return res.status(500).json({ message: "Failed to fetch ingredient data from Spoonacular API" });
+				console.log(`Fetching from Spoonacular: ${ingredientId}`);
+				const apiKey = process.env.API_KEY;
+				if (!apiKey) {
+					console.error("SPOONACULAR_API_KEY is not set");
+					return res.status(500).json({ message: "Server configuration error: API key missing" });
 				}
 			}
+			try {
+				const response = await axios.get(`https://api.spoonacular.com/food/ingredients/${ingredientId}/information?amount=1&apiKey=${process.env.API_KEY}`);
+				const spoonacularData = response.data;
+				ingredient = new Ingredients(ingredientsFactory(spoonacularData));
+				await ingredient.save();
+			} catch (apiError) {
+				console.error("Spoonacular API error:", apiError.response?.status, apiError.response?.data);
+				return res.status(502).json({ message: "Failed to fetch ingredient data from Spoonacular API" });
+			}
 
-			await Users.findOneAndUpdate(
+			console.log(`Updating user with ingredient: ${ingredient._id}`);
+			const updatedUser = await Users.findOneAndUpdate(
 				{ username },
 				{
 					$push: {
@@ -131,9 +141,13 @@ module.exports = function (database) {
 				{ new: true }
 			);
 
+			if (!updatedUser) {
+				return res.status(500).json({ message: "Failed to update user with ingredient" });
+			}
+
 			res.status(201).json({ message: "Ingredient added successfully" });
 		} catch (error) {
-			console.error("Error adding ingredient:", error);
+			console.error("Error adding ingredient:", error.message, error.stack);
 			res.status(500).json({ message: "Failed to add ingredient", error: error.message });
 		}
 	});
