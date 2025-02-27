@@ -18,7 +18,7 @@ app.set("trust proxy", 1);
 // CORS configuration with specific origin
 app.use(
 	cors({
-		origin: "https://nutri-tracker.krisrahnev.com", // Specific origin instead of wildcard
+		origin: "https://nutri-tracker-app-frontend.vercel.app", // Specific origin instead of wildcard
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
