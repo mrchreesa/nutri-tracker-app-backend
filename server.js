@@ -40,8 +40,8 @@ app.get("/api/health", (req, res) => {
 // Set trust proxy before defining routes
 app.set("trust proxy", 1);
 
-app.use("/api/ingredients", Ingredients(db));
-app.use("/api/users", Users(db));
+app.use("/ingredients", Ingredients(db));
+app.use("/users", Users(db));
 
 // Add error handling middleware
 app.use((err, req, res, next) => {
