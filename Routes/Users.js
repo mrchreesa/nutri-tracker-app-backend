@@ -60,8 +60,9 @@ module.exports = function (database) {
 								.catch(() => console.log("Saving failed."));
 							res.cookie("user", JSON.stringify({ username, email }), {
 								httpOnly: true,
-
-								expiresIn: 86400,
+								sameSite: "none",
+								secure: true,
+								maxAge: 86400000,
 							});
 							res.send({ username, email });
 						})
@@ -218,10 +219,10 @@ module.exports = function (database) {
 					if (isPasswordCorrect) {
 						const userData = { username: foundUser.username, email };
 						res.cookie("user", JSON.stringify(userData), {
-							httpOnly: true /*
-                domain: process.env.COOKIE_DOMAIN,
-                sameSite: "none",
-                expiresIn: 86400,*/,
+							httpOnly: true,
+							sameSite: "none",
+							secure: true,
+							maxAge: 86400000,
 						});
 						res.send(userData);
 						console.log(userData);
