@@ -45,8 +45,8 @@ mongoose
 var db = mongoose;
 
 // Define routes
-app.use("/ingredients", Ingredients(db));
-app.use("/users", Users(db));
+app.use("/api/ingredients", Ingredients(db));
+app.use("/api/users", Users(db));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
