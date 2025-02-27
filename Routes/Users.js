@@ -7,27 +7,19 @@ module.exports = function (database) {
 	router.post("/", async (req, res) => {
 		try {
 			const { username, password, email } = req.body;
-
-			// Validate input
 			if (!username || !password || !email) {
 				return res.status(400).json({ message: "Missing required fields" });
 			}
 			if (password.length < 6) {
 				return res.status(400).json({ message: "Password must be at least 6 characters" });
 			}
-
-			// Check for existing user
 			const existingUser = await Users.findOne({ $or: [{ username }, { email }] });
 			if (existingUser) {
 				return res.status(409).json({ message: "Username or email already taken" });
 			}
-
-			// Hash password and save user
 			const hash = await bcrypt.hash(password, 10);
 			const newUser = new Users({ username, password: hash, email });
 			await newUser.save();
-
-			// Set cookie and respond
 			const userData = { username, email };
 			res.cookie("user", JSON.stringify(userData), {
 				httpOnly: true,
@@ -42,7 +34,7 @@ module.exports = function (database) {
 		}
 	});
 
-	// Other routes (simplified for brevity)
+	// Check Session
 	router.get("/session", (req, res) => {
 		if (req.cookies.user) {
 			res.json(JSON.parse(req.cookies.user));
@@ -51,6 +43,7 @@ module.exports = function (database) {
 		}
 	});
 
+	// Get User by Username
 	router.get("/:username", (req, res) => {
 		Users.find({ username: req.params.username })
 			.populate({ path: "ingredients.ingredient", model: "Ingredients" })
@@ -58,7 +51,43 @@ module.exports = function (database) {
 			.catch((err) => res.status(500).json({ message: err.message }));
 	});
 
-	// Add other routes as needed...
+	// Login
+	router.post("/session", async (req, res) => {
+		try {
+			const { email, password } = req.body;
+			const user = await Users.findOne({ email });
+			if (!user) {
+				return res.status(401).json({ message: "Invalid user" });
+			}
+			const isPasswordCorrect = await bcrypt.compare(password, user.password);
+			if (!isPasswordCorrect) {
+				return res.status(401).json({ message: "Incorrect credentials" });
+			}
+			const userData = { username: user.username, email };
+			res.cookie("user", JSON.stringify(userData), {
+				httpOnly: true,
+				sameSite: "none",
+				secure: true,
+				maxAge: 86400000,
+			});
+			res.json(userData);
+		} catch (error) {
+			console.error("Login error:", error);
+			res.status(500).json({ message: "Failed to log in" });
+		}
+	});
+
+	// Logout
+	router.delete("/session", (req, res) => {
+		console.log("Logout requested");
+		res.cookie("user", undefined, {
+			httpOnly: true,
+			sameSite: "none",
+			secure: true,
+			maxAge: 0,
+		});
+		res.json({ message: "Logged out!" });
+	});
 
 	return router;
 };
