@@ -16,9 +16,13 @@ module.exports = function (database) {
 	});
 
 	// GET user by username
+
 	router.get("/:username", async (req, res) => {
 		try {
 			const { username } = req.params;
+			if (!username || username === "undefined") {
+				return res.status(400).json({ message: "Invalid username" });
+			}
 			const user = await Users.find({ username }).populate({
 				path: "ingredients.ingredient",
 				model: "Ingredients",
@@ -103,10 +107,15 @@ module.exports = function (database) {
 
 			let ingredient = await Ingredients.findOne({ foodId: ingredientId });
 			if (!ingredient) {
-				const response = await axios.get(`https://api.spoonacular.com/food/ingredients/${ingredientId}/information?amount=1&apiKey=${process.env.SPOONACULAR_API_KEY}`);
-				const spoonacularData = response.data;
-				ingredient = new Ingredients(ingredientsFactory(spoonacularData));
-				await ingredient.save();
+				try {
+					const response = await axios.get(`https://api.spoonacular.com/food/ingredients/${ingredientId}/information?amount=1&apiKey=${process.env.SPOONACULAR_API_KEY}`);
+					const spoonacularData = response.data;
+					ingredient = new Ingredients(ingredientsFactory(spoonacularData));
+					await ingredient.save();
+				} catch (apiError) {
+					console.error("Spoonacular API error:", apiError);
+					return res.status(500).json({ message: "Failed to fetch ingredient data from Spoonacular API" });
+				}
 			}
 
 			await Users.findOneAndUpdate(
@@ -125,7 +134,7 @@ module.exports = function (database) {
 			res.status(201).json({ message: "Ingredient added successfully" });
 		} catch (error) {
 			console.error("Error adding ingredient:", error);
-			res.status(500).json({ message: "Failed to add ingredient" });
+			res.status(500).json({ message: "Failed to add ingredient", error: error.message });
 		}
 	});
 
