@@ -1,7 +1,6 @@
 const express = require("express");
 const session = require("express-session");
 const app = express();
-const router = express.Router();
 const { json } = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -29,20 +28,10 @@ app.use(
 	})
 );
 
-// Remove this redundant middleware - cors() already handles OPTIONS
-// app.use((req, res, next) => {
-//   if (req.method === "OPTIONS") {
-//     res.setHeader("Access-Control-Allow-Origin", "*");
-//     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//     res.status(200).end();
-//     return;
-//   }
-//   next();
-// });
-
-// Remove this too - cors() handles it
-// app.options("*", (req, res) => { ... });
+// Explicitly handle OPTIONS requests
+app.options("*", (req, res) => {
+	res.status(200).end();
+});
 
 const Ingredients = require("./Routes/Ingredients");
 const Users = require("./Routes/Users");
@@ -67,6 +56,7 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 8080;
 
+// Only start the server if not on Vercel
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
 	app.listen(port, () => {
 		console.log(`Server is listening on port ${port}...`);
@@ -78,4 +68,5 @@ if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
 	bree.start();
 }
 
+// Export for Vercel
 module.exports = app;
