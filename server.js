@@ -15,11 +15,11 @@ app.use(json());
 app.use(cookieParser());
 app.set("trust proxy", 1);
 
-// Very permissive CORS configuration
+// CORS configuration with specific origin
 app.use(
 	cors({
-		origin: true, // Allow any origin
-		credentials: true, // Allow credentials
+		origin: "https://nutri-tracker.krisrahnev.com", // Specific origin instead of wildcard
+		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
 		preflightContinue: false,
