@@ -12,8 +12,8 @@ require("dotenv").config();
 
 app.use(
 	cors({
-		credentials: true,
-		origin: "*",
+		credentials: false,
+		origin: "https://nutri-tracker-app-backend.vercel.app",
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie"],
 	})
